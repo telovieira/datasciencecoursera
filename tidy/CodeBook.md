@@ -16,19 +16,19 @@
 * dataset           : row bind of train and test datasets
 
 ## 2. Extracts only the measurements on the mean and standard deviation for each measurement.
-ms                  : a vector of mean and std labels pulled out from features dataset
-dataset             : replace dataset with only mean and std variables
+* ms                  : a vector of mean and std labels pulled out from features dataset
+* dataset             : replace dataset with only mean and std variables
 
 ## 3. Uses descriptive activity names to name the activities in the data set
-dataset$Activities  : rename activity IDs with activities names
+* dataset$Activities  : rename activity IDs with activities names
 
 ## 4. Appropriately labels the data set with descriptive variable names.
-clean_names         : clean feature names vector and setup names for column names of dataset
-volunteers          : merge (row bind) volunteers train and volunteers test sets, give descriptive label
-activities          : merge (row bind) activities train and activities test sets, give descriptive label
-dataset             : merge (column bind) activies, volunteers, and dataset sets
+* clean_names         : clean feature names vector and setup names for column names of dataset
+* volunteers          : merge (row bind) volunteers train and volunteers test sets, give descriptive label
+* activities          : merge (row bind) activities train and activities test sets, give descriptive label
+* dataset             : merge (column bind) activies, volunteers, and dataset sets
 
 ## 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject
-b                   : molten data using ID Volunteers + Activities
-dataset2            : reshape a molten data (b) into a second data frame
-write.table         : write tidy data, as "tidy_data.txt" using "," separator, to the current directory
+* b                   : molten data using ID Volunteers + Activities
+* dataset2            : reshape a molten data (b) into a second data frame
+* write.table         : write tidy data, as "tidy_data.txt" using "," separator, to the current directory
