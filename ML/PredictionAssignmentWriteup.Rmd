@@ -1,0 +1,148 @@
+---
+title: "Prediction Assignment Writeup"
+author: "Luiz Marcelo V Vieira"
+date: "July 3, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement that a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har 
+
+## Load library
+```{r}
+library(ggplot2)
+library(caret)
+library(rpart)
+library(rattle)
+library(rpart.plot)
+library(randomForest)
+library(gbm)
+```
+
+## Data
+The training data for this project are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+```{r}
+setwd("D:\\projetos\\data-science")
+
+if (!file.exists("pml-training.csv")) {
+  URLTrain <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+  download.file(URLTrain, destfile = "pml-training.csv")
+}
+
+if (!file.exists("pml-testing.csv")) {
+  URLTest <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+  download.file(URLTest, destfile = "pml-testing.csv")
+}
+```
+
+
+## Loading Data
+```{r}
+training <- read.csv(file="pml-training.csv", na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(file="pml-testing.csv", na.strings=c("NA","#DIV/0!",""))
+dim(training); dim(testing)
+```
+
+
+## Cleaning Data
+The first 7 columns are variables that has no relationship with "classe"
+```{r}
+training <- training[, colSums(is.na(training))== 0] 
+testing <- testing[, colSums(is.na(testing))== 0]
+training <- training[,-c(1:7)]
+testing <- testing[,-c(1:7)]
+dim(training); dim(testing)
+```
+
+
+## Training, Test, and Validation Data
+The most three popular prediction models will be applied in the training dataset and the one with the best accuracy is going to be used for prediction over the testing dataset. The training data set is split in 2 parts whose rate is 70% for training and 30% for validating all three models. Those methods are Decision Tree, Random Forest, and Generalized Boosted Model.
+
+```{r}
+set.seed(411)
+inTrain  <- createDataPartition(training$classe, p=0.7, list=FALSE)
+trainSet <- training[inTrain, ]
+testSet  <- training[-inTrain, ]
+dim(trainSet); dim(testSet)
+
+plot(trainSet$classe, col="blue", main="Level Frequency", xlab="Classe", ylab="Frequency")
+```
+
+
+## Prediction Models
+
+# Decision Tree
+```{r}
+set.seed(410)
+dTM <- rpart(classe ~ ., data = trainSet, method = "class")
+fancyRpartPlot(dTM)
+
+```
+
+```{r}
+dTP <- predict(dTM, newdata=testSet, type="class")
+cTree <- confusionMatrix(dTP, testSet$classe)
+cTree
+```
+
+
+# Random Forest
+```{r}
+set.seed(411)
+controlRF <- trainControl(method="cv", 5)
+modFitRF <- train(classe ~ ., data=trainSet, method="rf", trControl=controlRF)
+modFitRF$finalModel
+```
+
+```{r}
+predictRF <- predict(modFitRF, newdata=testSet)
+confMatRF <- confusionMatrix(predictRF, testSet$classe)
+confMatRF
+```
+
+```{r}
+plot(confMatRF$table, col = confMatRF$byClass, 
+     main = paste("Random Forest - Accuracy =",
+                  round(confMatRF$overall['Accuracy'], 4)))
+
+```
+
+# Generalized Boosted Model (GBM)
+```{r}
+set.seed(411)
+controlGBM <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+modFitGBM  <- train(classe ~ ., data=trainSet, method = "gbm", trControl = controlGBM, verbose = FALSE)
+modFitGBM$finalModel
+```
+
+```{r}
+predictGBM <- predict(modFitGBM, newdata=testSet)
+confMatGBM <- confusionMatrix(predictGBM, testSet$classe)
+confMatGBM
+```
+
+
+
+## Applying the best model to the Test dataset
+Accuracy of the 3 models:
+Random Forest: 0.9942 
+GBM          : 0.9609
+Decision Tree: 0.7431
+
+
+```{r}
+predictValTest <- predict(modFitRF, newdata=testing)
+predictValTest
+
+```
+
+
