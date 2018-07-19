@@ -1,0 +1,30 @@
+---
+title: "R Markdown and Leaflet"
+author: "Luiz Marcel V Vieira"
+date: "July 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Soccer Worldcup Winners, Year, and Location
+```{r, echo=FALSE}
+library(leaflet)
+wCupFlag <- makeIcon(
+  iconUrl = "C:\\Users\\luizmvv\\Documents\\mlearning\\bola.png",
+  iconWidth= 31*215/230, iconHeight = 31,
+  iconAnchorX = 31*215/230/2, iconAnchorY = 16
+)
+wCupLatLong <- data.frame(
+  lat = c(-32.5228, 41.8719, 46.2276, -14.2350, 46.8182, 60.1282, -35.6751, 52.3555, 23.6345, 51.1657, -38.4161, 40.4637, 23.6345, 41.8719, 37.0902, 46.2276, 36.2048, 51.1657, -30.5595, -14.2350, 61.5240),
+  lng = c(-55.7658, 12.5674, 2.2137, -51.9253, 8.2275, 18.6435, -71.5430, 1.1743, -102.5528, 10.4515, -63.6167,-3.7492, -102.5528, 12.5674, -95.7129, 2.2137, 138.2529, 10.4515, 22.9375, -51.9253, 105.3188)
+)
+wCupChampion <- c("Uruguay - 1930", "Italy - 1934", "Italy - 1938", "Uruguay - 1950",
+                  "Germany - 1954", "Brazil - 1958", "Brazil - 1962", "England - 1966",
+                  "Brazil - 1970","Germany - 1974", "Argentina - 1978", "Italy - 1982", "Argentina - 1986", "Germany - 1990", "Brazil - 1994", "France - 1998", "Brazil - 2002", "Italy - 2006", "Spain - 2010", "Germany - 2014", "France - 2018")
+wCupLatLong %>% leaflet() %>% addTiles() %>% addMarkers(icon = wCupFlag, popup = wCupChampion, clusterOptions = markerClusterOptions())
+
+```
+
